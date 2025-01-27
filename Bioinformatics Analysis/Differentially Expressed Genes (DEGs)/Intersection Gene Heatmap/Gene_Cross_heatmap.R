@@ -18,14 +18,14 @@ data_matrix <- read.csv("DEGs_intersect.csv", header = TRUE, row.names = 1)
 # 转置数据矩阵
 data_matrix <- t(data_matrix)
 
-# 创建样本分组信息,假设前 5 个样本是 Group1，后 5 个样本是 Group2
+# 创建样本分组信息,假设前 5 个样本是 Group1，后 5 个样本是 Group2，可以根据这一部分修改分组图例的名称，示例为Group 1和Group 2
 sample_groups <- c(rep("Group1", 5), rep("Group2", 5))
 
 
 # 2. 绘制热力图
 # 创建样本分组信息的 data.frame，并确保行名匹配
 annotation_row <- data.frame(Group = sample_groups, row.names = rownames(data_matrix))
-# 指定行注释信息的颜色
+# 指定行注释信息的颜色和名称，要和上面的c(rep("Group1", 5), rep("Group2", 5))里面的分组名称一样,示例为Group 1和Group 2
 annotation_colors <- list(Group = c(Group1 = "#9D1871", Group2 = "#5572CC"))
 
 # 绘制热图并保存为图片文件（例如，PNG格式）
