@@ -1,7 +1,7 @@
 # 设置工作目录 (可选，如果数据文件在当前工作目录下则不需要)
 setwd("F:/R") 
 
-# 加载必要的包
+# 加载必要的R包
 library(limma)
 library(ggplot2)
 
