@@ -86,7 +86,8 @@ for (i in 1:top_n) {
   new_file <- paste0("Pathway_", i, "_", clean_name, ".png")
   if (file.exists(old_file)) file.rename(old_file, new_file)
 }
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # 自定义主题设置，用于绘制气泡图和柱状图
 custom_theme <- theme_bw() +
@@ -101,7 +102,7 @@ custom_theme <- theme_bw() +
     plot.margin      = margin(t = 20, r = 20, b = 20, l = 100, unit = "pt")  # 设置图形边距
   )
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # 绘制气泡图
 generate_kegg_bubble <- function(enrich_result, ontology, top_n = 10, output_filename) {
@@ -280,6 +281,7 @@ generate_kegg_circos <- function(enrich_result, output_filename, top_n = 6) {
   circos.clear()
   dev.off()
 }
+
 # 绘制并保存圈(弦)图
 generate_kegg_circos(kegg, "kegg_circos.png")
 

@@ -39,7 +39,7 @@ diff <- read.csv("gene.csv")
 gene.df <- bitr(diff$SYMBOL, 
                 fromType = "SYMBOL", 
                 toType = "ENTREZID", 
-                OrgDb = org.Hs.eg.db)
+                OrgDb = org.Hs.eg.db)   # 物种为人类
 
 gene <- gene.df$ENTREZID  # 提取转换后的Entrez ID向量
 
@@ -103,6 +103,7 @@ custom_theme <- theme_bw() +
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# 绘制气泡图
 generate_go_bubble <- function(enrich_result, ontology, top_n = 10, output_filename) {
   # 将富集结果转换为数据框
   data <- as.data.frame(enrich_result)
@@ -267,6 +268,7 @@ generate_go_circos <- function(enrich_result, output_filename, top_n = 8) {
   circos.clear()
   dev.off()
 }
+
 # 绘制并保存圈(弦)图
 generate_go_circos(ego_BP, "GO_BP_circos.png")
 generate_go_circos(ego_CC, "GO_CC_circos.png")
