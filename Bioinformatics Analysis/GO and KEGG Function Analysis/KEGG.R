@@ -62,7 +62,7 @@ perform_kegg_enrichment <- function(genes) {
 
 kegg <- perform_kegg_enrichment(gene)
 
-#4. 将结果保存到当前路径
+# 4. 将结果保存到当前路径
 ego_result_kegg <- as.data.frame(kegg)
 write.csv(ego_result_kegg,file = "ego_result_kegg.csv",row.names = T)
 

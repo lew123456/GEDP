@@ -43,7 +43,7 @@ fit2 <- eBayes(fit2)
 # 获取差异表达分析结果，使用 BH 方法进行多重比较校正，并显示所有基因的结果
 results <- topTable(fit2, coef = "Group2vsGroup1", adjust.method = "BH", number = Inf)
 
-# 设置筛选标准：Fold Change 的绝对值大于 log2(2)=1，校正后的 p 值小于 0.05
+# 设置筛选标准：Fold Change 的绝对值大于 log2(2)=1，校正后的 p 值，即adj.P.Value小于 0.05
 fold_change_cutoff <- 2
 adj_p_cutoff <- 0.05
 

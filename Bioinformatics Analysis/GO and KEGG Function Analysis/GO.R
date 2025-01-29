@@ -69,7 +69,7 @@ ego_CC <- perform_go_enrichment(gene, "CC")  # （细胞组分）
 ego_MF <- perform_go_enrichment(gene, "MF")  # （分子功能）
 
 
-#4. 将结果保存到当前路径
+# 4. 将结果保存到当前路径
 ego_result_BP <- as.data.frame(ego_BP)
 ego_result_CC <- as.data.frame(ego_CC)
 ego_result_MF <- as.data.frame(ego_MF)
