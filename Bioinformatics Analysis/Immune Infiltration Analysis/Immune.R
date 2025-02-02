@@ -241,4 +241,72 @@ ggplot(df_cor, aes(cell_type, gene)) +
         panel.background = element_blank())
 dev.off()
 
+#--------------------------------------------------------------------------------------------------------------
+
+# @绘制免疫细胞分组丰度热图
+cibersort_long <- cibersort[,-c(1,24:26)]      # 从数据框cibersort中移除第1列以及第24到26列,将剩余的列保存到一个新的数据框cibersort_long中
+cibersort_long$ID <- rownames(cibersort_long)  # 添加样本ID列,将行名作为新的一列 ID 添加到数据框中。
+
+# **根据样本顺序创建分组：示例为前5个为对照组，后5个为IDD组
+# **重要**: 这个需要根据每组的样本数目进行修改。可以根据这一部分修改分组图例的名称，示例为control和IDD
+cibersort_long$Group <- c(rep("control", 5), rep("IDD", 5))
+
+# 转换为长格式：细胞类型和其对应的比例
+cibersort_long <- cibersort_long %>%
+  gather(key = "Cell_Type", value = "Proportion", -Group, -ID)
+
+# 去掉 Cell_Type 中的 "_CIBERSORT" 后缀
+cibersort_long$Cell_Type <- gsub("_CIBERSORT", "", cibersort_long$Cell_Type)
+
+# 过滤掉比例全为0的免疫细胞列
+cibersort_filtered <- cibersort_long %>%
+  group_by(Cell_Type) %>%
+  filter(any(Proportion > 0)) %>%  # 只保留至少有一个非零值的免疫细胞
+  ungroup()
+
+png(filename = "heatmap.png", width = 1800, height = 1200, res = 300)
+cibersort_filtered %>%
+  group_by(Group) %>%
+  heatmap(
+    .row = Cell_Type,               # 行为细胞类型
+    .column = ID,                   # 列为样本ID
+    .value = Proportion,            # 值为比例
+    scale = "column",               # 对列进行缩放（标准化）
+    
+    # 设置热图颜色调色板
+    palette_value = circlize::colorRamp2(
+      seq(-2, 2, length.out = 11),  # 颜色范围从-2到2，分为11个等级
+      RColorBrewer::brewer.pal(11, "Spectral")  # 使用Spectral调色板
+    ),
+    
+    # 设置分组标签的颜色
+    palette_grouping = list(c("#1F78B4", "#E31A1C")),  # "normal" 为蓝色，"tumor" 为红色
+    
+    show_column_names = FALSE,  # 不显示列名
+    row_names_gp = gpar(fontsize = 10),  # 行名字体大小
+    column_title_gp = gpar(fontsize = 7),  # 列标题字体大小
+    row_title_gp = gpar(fontsize = 7)      # 行标题字体大小
+  )
+dev.off()
+
+#--------------------------------------------------------------------------------------------------------------
+
+# @绘制箱线图，不分组，其中，每一列表示一个免疫细胞种类，纵坐标轴表示该细胞在样本中的丰度
+# 将格式变换长数据
+cibersort_long<-cibersort%>%
+  select(`P-value_CIBERSORT`,Correlation_CIBERSORT,RMSE_CIBERSORT,ID,everything())%>%
+  pivot_longer(-c(1:4),names_to="cell_type",values_to="fraction")%>%     #变换为长数据
+  dplyr::mutate(cell_type=gsub("_CIBERSORT","",cell_type),    #去除细胞名称的尾巴
+                cell_type=gsub("_"," ",cell_type))            #“_”改空格，名字好看一些
+
+png(filename = "boxplot_nogroup.png", width = 3000, height = 1800, res = 300)
+ggplot(cibersort_long,aes(fct_reorder(cell_type,fraction),fraction,fill=cell_type))+
+  geom_boxplot()+
+  theme_bw()+
+  labs(x="Cell Type",y="Estimated Proportion")+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        legend.position="bottom")+
+  scale_fill_manual(values=palette4)
+dev.off()
 
