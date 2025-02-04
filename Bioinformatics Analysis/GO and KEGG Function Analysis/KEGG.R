@@ -104,39 +104,63 @@ custom_theme <- theme_bw() +
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# 获取KEGG通路分类信息 
+pathway_ids <- kegg@result$ID
+categories <- sapply(pathway_ids, function(id) {
+  tryCatch({
+    pathway_info <- keggGet(paste0("path:", id))
+    class_info <- pathway_info[[1]]$CLASS
+    if (!is.null(class_info)) {
+      strsplit(class_info, ";")[[1]][1]
+    } else {
+      "Unknown"
+    }
+  }, error = function(e) return("Unknown"))
+})
+kegg@result$Category <- factor(categories)
+
 # 绘制气泡图
 generate_kegg_bubble <- function(enrich_result, ontology, top_n = 10, output_filename) {
-  # 将富集结果转换为数据框
-  data <- as.data.frame(enrich_result)
-  
-  # 计算GeneRatio，并对Description进行文本换行
-  data <- data %>%
+  # 数据处理
+  data <- as.data.frame(enrich_result) %>% 
+    arrange(p.adjust) %>%
+    dplyr::slice(1:top_n) %>%
     mutate(
-      GeneRatio = sapply(strsplit(GeneRatio, "/"), function(x) as.numeric(x[1]) / as.numeric(x[2])),
-      Description = str_wrap(Description, width = 35)  #对过长的描述文字自动换行，每行最多35字符，防止y轴标签重叠
+      GeneRatio = sapply(strsplit(GeneRatio, "/"), 
+                         function(x) as.numeric(x[1])/as.numeric(x[2])),
+      Description = str_wrap(Description, width = 35),
+      Category = factor(Category, levels = unique(Category))
     )
   
-  # 截取前 top_n 个条目
-  data <- data[1:top_n, ]
+  # 生成分类颜色 (使用Viridis调色板)
+  category_colors <- viridis::viridis(nlevels(data$Category))
   
-  # 绘制气泡图
-  p <- ggplot(data, aes(x = GeneRatio, y = Description)) +
-    geom_point(aes(size = Count, color = -log10(p.adjust))) +
-    geom_segment(aes(xend = 0, yend = Description), linetype = "dashed", color = "grey50") +
-    scale_color_gradient(low = "#9869c9", high = "#b24175") +
-    scale_size_continuous(range = c(4, 10)) +   #c(4,10)是描述气泡范围大小的,气泡最小4像素，最大10像素
-    labs(
-      title = paste("KEGG", ontology, sep = " "), # 标题中加入本体类型
-      x = "Gene Ratio",
-      size = "Gene Count",
-      color = "-log10(p.adjust)"
-    ) +
-    ylab(NULL) +
+  # 绘制图形
+  p <- ggplot(data, aes(x = GeneRatio, y = reorder(Description, -p.adjust))) +
+    # 添加虚线层（不同颜色表示分类）
+    geom_segment(aes(xend = 0, yend = Description, color = Category),
+                 linetype = "dashed", linewidth = 0.8, show.legend = TRUE) +
+    scale_color_manual(values = category_colors) +
+    # 重置颜色标度用于气泡
+    ggnewscale::new_scale_color() +
+    # 添加气泡层
+    geom_point(aes(size = Count, color = -log10(p.adjust)), alpha = 0.8) +
+    scale_color_gradient(low = "#9966CC", high = "#C46210") +
+    scale_size_continuous(range = c(4, 10)) +
+    # 添加标签和主题
+    labs(title = paste("KEGG", ontology, " "),
+         x = "Gene Ratio", y = NULL,
+         color = "-log10(p.adjust)", size = "Gene Count") +
     custom_theme +
-    theme(axis.text.y = element_text(size = 10, hjust = 1, lineheight = 0.8))
+    theme(legend.position = "right",
+          legend.box = "vertical",
+          legend.spacing.y = unit(0.2, "cm")) +
+    guides(color = guide_colorbar(order = 1),
+           size = guide_legend(order = 2),
+           linetype = guide_legend(order = 3))
   
   # 保存图片
-  png(output_filename, width = 1300, height = 800, res = 150)  #保存图片的长、宽、分辨率
+  png(output_filename, width = 1550, height = 800, res = 150)  #保存图片的长、宽、分辨率
   print(p)
   dev.off()
 }
