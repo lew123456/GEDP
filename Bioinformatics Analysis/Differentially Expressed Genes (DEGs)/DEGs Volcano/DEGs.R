@@ -17,7 +17,10 @@ library(ggplot2)
 expression_data <- read.csv("Data_Processing.csv", header = TRUE, row.names = 1)
 
 # 定义样本分组信息，假设前 5 个样本是 Group1，后 5 个样本是 Group2
-group <- factor(c(rep("Group1", 5), rep("Group2", 5)))
+#group <- factor(c(rep("Group1", 5), rep("Group2", 5)))
+# 定义样本分组信息（按列名匹配的为一组，剩下的为一组）
+group1_samples <- c("GSM1354764","GSM1354765","GSM1354766","GSM1354767","GSM1354768")
+group <- factor(ifelse(colnames(expression_data) %in% group1_samples, "Group1", "Group2"))
 
 # 检查分组信息长度是否与样本数一致
 if (length(group) != ncol(expression_data)) {

@@ -19,8 +19,10 @@ data_matrix <- read.csv("DEGs_intersect.csv", header = TRUE, row.names = 1)
 data_matrix <- t(data_matrix)
 
 # 创建样本分组信息,假设前 5 个样本是 Group1，后 5 个样本是 Group2，可以根据这一部分修改分组图例的名称，示例为Group 1和Group 2
-sample_groups <- c(rep("Group1", 5), rep("Group2", 5))
-
+#sample_groups <- c(rep("Group1", 5), rep("Group2", 5))
+# 定义样本分组信息（按列名匹配的为一组，剩下的为一组）
+group1_samples <- c("GSM1354764","GSM1354765","GSM1354766","GSM1354767","GSM1354768")
+sample_groups <- factor(ifelse(colnames(expression_data) %in% group1_samples, "Group1", "Group2"))
 
 # 2. 绘制热力图
 # 创建样本分组信息的 data.frame，并确保行名匹配
